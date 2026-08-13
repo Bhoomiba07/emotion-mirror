@@ -1,9 +1,10 @@
 /**
  * MongoDB connection stub for a later phase.
- * Phase 1 intentionally does not connect to a database.
+ * Future phases must use MongoDB Atlas via MONGODB_URI env var (never local MongoDB).
+ * No database connection is established in Phase 1/2.
  */
 export async function connectDatabase() {
-  throw new Error('MongoDB integration is not implemented in Phase 1.');
+  throw new Error('MongoDB Atlas integration is not implemented yet.');
 }
 
 export function getDatabaseStatus() {
