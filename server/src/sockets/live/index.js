@@ -10,15 +10,10 @@ import {
 } from '../../services/liveSessionService.js';
 import { LIVE_EVENTS } from './events.js';
 
-export function attachLiveSocket(server) {
-  const io = new Server(server, {
-    cors: {
-      origin: env.clientOrigin,
-      methods: ['GET', 'POST'],
-    },
-    path: '/socket.io',
-  });
-
+/**
+ * Register Live Conversation Socket.IO handlers on a shared io instance.
+ */
+export function registerLiveHandlers(io) {
   io.on('connection', (socket) => {
     let currentCode = null;
     let currentParticipantId = null;
@@ -50,7 +45,7 @@ export function attachLiveSocket(server) {
           return;
         }
 
-        const updated = addParticipant(code, {
+        addParticipant(code, {
           id: participantId,
           name: trimmedName,
           role,
@@ -136,6 +131,17 @@ export function attachLiveSocket(server) {
       }
     });
   });
+}
 
+export function attachLiveSocket(server) {
+  const io = new Server(server, {
+    cors: {
+      origin: env.clientOrigin,
+      methods: ['GET', 'POST'],
+    },
+    path: '/socket.io',
+  });
+
+  registerLiveHandlers(io);
   return io;
 }

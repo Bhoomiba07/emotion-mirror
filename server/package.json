@@ -6,7 +6,8 @@
   "scripts": {
     "dev": "nodemon src/index.js",
     "start": "node src/index.js",
-    "test:live": "node scripts/test-live-flow.js"
+    "test:live": "node scripts/test-live-flow.js",
+    "test:private": "node scripts/test-private-flow.js"
   },
   "dependencies": {
     "cors": "^2.8.5",

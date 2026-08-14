@@ -1,14 +1,27 @@
-import { attachLiveSocket } from './live/index.js';
+import { Server } from 'socket.io';
+import { env } from '../config/env.js';
+import { registerLiveHandlers } from './live/index.js';
+import { registerPrivateHandlers } from './private/index.js';
 
 /**
- * Attach Socket.IO for Live Conversation mode.
- * Private mode sockets will be added in a later phase.
+ * Attach a shared Socket.IO server for Live and Private modes.
  */
 export function attachSockets(server) {
-  const io = attachLiveSocket(server);
+  const io = new Server(server, {
+    cors: {
+      origin: env.clientOrigin,
+      methods: ['GET', 'POST'],
+    },
+    path: '/socket.io',
+  });
+
+  registerLiveHandlers(io);
+  registerPrivateHandlers(io);
+
   return {
     enabled: true,
     live: true,
+    private: true,
     io,
   };
 }

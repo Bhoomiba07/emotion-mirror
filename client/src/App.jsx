@@ -10,7 +10,12 @@ import LiveWaitingPage from './modes/live/LiveWaitingPage.jsx';
 import LiveJoinPage from './modes/live/LiveJoinPage.jsx';
 import LiveRoomPage from './modes/live/LiveRoomPage.jsx';
 import LiveEndedPage from './modes/live/LiveEndedPage.jsx';
-import PrivateModePlaceholder from './modes/private/PrivateModePlaceholder.jsx';
+import PrivateRoomLayout from './modes/private/PrivateRoomLayout.jsx';
+import PrivateCreatePage from './modes/private/PrivateCreatePage.jsx';
+import PrivateWaitingPage from './modes/private/PrivateWaitingPage.jsx';
+import PrivateJoinPage from './modes/private/PrivateJoinPage.jsx';
+import PrivateRoomPage from './modes/private/PrivateRoomPage.jsx';
+import PrivateCompletePage from './modes/private/PrivateCompletePage.jsx';
 import SoloModePlaceholder from './modes/solo/SoloModePlaceholder.jsx';
 
 function App() {
@@ -25,12 +30,19 @@ function App() {
         <Route path="/live/waiting/:code" element={<LiveWaitingPage />} />
         <Route path="/live/join/:code" element={<LiveJoinPage />} />
         <Route path="/live/ended/:code" element={<LiveEndedPage />} />
-        <Route path="/private" element={<PrivateModePlaceholder />} />
+        <Route path="/private" element={<PrivateCreatePage />} />
+        <Route path="/private/waiting/:code" element={<PrivateWaitingPage />} />
+        <Route path="/private/join/:code" element={<PrivateJoinPage />} />
+        <Route path="/private/complete/:code" element={<PrivateCompletePage />} />
         <Route path="/solo" element={<SoloModePlaceholder />} />
       </Route>
 
       <Route element={<LiveRoomLayout />}>
         <Route path="/live/room/:code" element={<LiveRoomPage />} />
+      </Route>
+
+      <Route element={<PrivateRoomLayout />}>
+        <Route path="/private/room/:code" element={<PrivateRoomPage />} />
       </Route>
     </Routes>
   );
