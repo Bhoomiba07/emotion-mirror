@@ -2,14 +2,13 @@
 
 AI-powered emotional understanding platform.
 
-## Phase 1 status
-
-Project foundation only:
+## Current status — Phase 3
 
 - React (Vite) frontend with routing and layout
-- Node.js + Express backend with modular stubs
-- Placeholders for Live, Private, and Solo modes
-- Prepared folders for Socket.IO, REST, AI, and MongoDB (not implemented yet)
+- Node.js + Express backend with modular architecture
+- **Live Conversation mode** — session creation, invite/join, consent, real-time messaging via Socket.IO
+- Private Mirror and Solo Reflection remain placeholders
+- No AI analysis, MongoDB, or authentication yet
 
 ## Run locally
 
@@ -33,6 +32,18 @@ npm run dev:client
 
 Health check: `http://localhost:4000/health`
 
+## Live Conversation flow (Phase 3)
+
+1. `/live` — create session (name + conversation type)
+2. `/live/waiting/:code` — host sees session code and invite link
+3. `/live/join/:code` — guest consent + join
+4. `/live/room/:code` — three-panel live room (demo mirror/temperature, real-time messages)
+5. `/live/ended/:code` — conversation ended
+
 ## Spec
 
 Product requirements live in `explaination_emo_mirror.pdf`.
+
+## Future database rule
+
+When persistence is added, use **MongoDB Atlas only** via environment variables — never local MongoDB.

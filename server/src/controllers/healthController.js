@@ -4,14 +4,14 @@ export const healthController = {
   getHealth(_req, res) {
     res.json({
       status: 'ok',
-      phase: 1,
+      phase: 3,
       modes: {
-        live: 'planned',
+        live: 'available',
         private: 'planned',
         solo: 'planned',
       },
       database: getDatabaseStatus(),
-      socket: { enabled: false },
+      socket: { enabled: true, live: true },
       ai: { enabled: false },
     });
   },

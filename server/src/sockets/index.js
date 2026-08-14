@@ -1,11 +1,14 @@
+import { attachLiveSocket } from './live/index.js';
+
 /**
- * Socket.IO attachment stub for Live and Private modes.
- * Real socket.io package and handlers arrive in a later phase.
+ * Attach Socket.IO for Live Conversation mode.
+ * Private mode sockets will be added in a later phase.
  */
-export function attachSocketPlaceholder(server) {
-  server.on('request', () => {});
+export function attachSockets(server) {
+  const io = attachLiveSocket(server);
   return {
-    enabled: false,
-    note: 'Socket.IO will be wired here for Live and Private modes.',
+    enabled: true,
+    live: true,
+    io,
   };
 }
