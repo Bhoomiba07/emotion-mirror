@@ -27,7 +27,7 @@ function LiveRoomPage() {
     }
   }, [role, name, code, navigate]);
 
-  const { connected, roomState, messages, error, ended, sendMessage, endConversation } =
+  const { connected, roomState, messages, error, ended, liveMirror, sendMessage, endConversation } =
     useLiveSocket({
       code,
       participantId,
@@ -98,7 +98,7 @@ function LiveRoomPage() {
       {(error || endError) && <p className="form-error live-room__error">{error || endError}</p>}
 
       <div className="live-room__panels">
-        <YourMirrorPanel />
+        <YourMirrorPanel liveMirror={liveMirror} />
         <ConversationPanel
           messages={messages}
           currentParticipantId={participantId}
@@ -109,7 +109,9 @@ function LiveRoomPage() {
       </div>
 
       <p className="live-room__footer-note">
-        Demo mirror and temperature values are static placeholders. Real-time messaging is active.
+        {liveMirror?.demo === false
+          ? 'AI analysis updates in real-time. Temperature panel remains static (demo).'
+          : 'Demo mirror and temperature values shown. Configure GEMINI_API_KEY for AI analysis.'}
       </p>
     </div>
   );

@@ -10,15 +10,15 @@ import {
 } from '../../services/privateSessionService.js';
 import { PRIVATE_EVENTS } from './events.js';
 
-function emitPrivateMirrorToSocket(socket, session, participantId) {
-  const mirror = getDemoPrivateMirror(session, participantId);
+async function emitPrivateMirrorToSocket(socket, session, participantId) {
+  const mirror = await getDemoPrivateMirror(session, participantId);
   if (mirror) {
     socket.emit(PRIVATE_EVENTS.PRIVATE_MIRROR, mirror);
   }
 }
 
 /**
- * Register Private Mirror Socket.IO handlers on a shared io instance.
+ * Register Private Mirror Socket.IO handlers on a shared io instance (Phase 6 AI-enabled).
  * Private mirror data is emitted only to the intended participant's socket.
  */
 export function registerPrivateHandlers(io) {
@@ -26,7 +26,7 @@ export function registerPrivateHandlers(io) {
     let currentCode = null;
     let currentParticipantId = null;
 
-    socket.on(PRIVATE_EVENTS.JOIN, (payload, callback) => {
+    socket.on(PRIVATE_EVENTS.JOIN, async (payload, callback) => {
       try {
         const { code, participantId, name, role } = payload ?? {};
         const session = getPrivateSession(code);
@@ -78,7 +78,7 @@ export function registerPrivateHandlers(io) {
         const sharedState = getSharedRoomState(currentCode);
 
         if (updatedSession.status !== 'ended') {
-          emitPrivateMirrorToSocket(socket, updatedSession, currentParticipantId);
+          await emitPrivateMirrorToSocket(socket, updatedSession, currentParticipantId);
         }
 
         socket.emit(PRIVATE_EVENTS.JOINED, sharedState);
@@ -93,7 +93,7 @@ export function registerPrivateHandlers(io) {
       }
     });
 
-    socket.on(PRIVATE_EVENTS.MESSAGE_SEND, (payload, callback) => {
+    socket.on(PRIVATE_EVENTS.MESSAGE_SEND, async (payload, callback) => {
       if (!currentCode || !currentParticipantId) {
         callback?.({ ok: false, message: 'Not connected to a private room.' });
         return;
@@ -124,6 +124,18 @@ export function registerPrivateHandlers(io) {
       });
 
       io.to(currentCode).emit(PRIVATE_EVENTS.MESSAGE_RECEIVED, message);
+
+      // Update AI mirrors after new message (controlled - only when message is sent)
+      const updatedSession = getPrivateSession(currentCode);
+      for (const p of updatedSession.participants) {
+        if (p.connected && p.socketId) {
+          const participantSocket = io.sockets.sockets.get(p.socketId);
+          if (participantSocket) {
+            await emitPrivateMirrorToSocket(participantSocket, updatedSession, p.id);
+          }
+        }
+      }
+
       callback?.({ ok: true, message });
     });
 
@@ -144,7 +156,7 @@ export function registerPrivateHandlers(io) {
       callback?.({ ok: true, roomState: sharedState });
     });
 
-    socket.on(PRIVATE_EVENTS.SHARE_REFLECTION, (payload, callback) => {
+    socket.on(PRIVATE_EVENTS.SHARE_REFLECTION, async (payload, callback) => {
       if (!currentCode || !currentParticipantId) {
         callback?.({ ok: false, message: 'Not connected to a private room.' });
         return;
@@ -156,7 +168,7 @@ export function registerPrivateHandlers(io) {
         return;
       }
 
-      const publicShare = setShareReflection(currentCode, currentParticipantId, payload?.selection);
+      const publicShare = await setShareReflection(currentCode, currentParticipantId, payload?.selection);
       if (!publicShare) {
         callback?.({ ok: false, message: 'Unable to save share selection.' });
         return;

@@ -1,7 +1,10 @@
 /**
- * In-memory Live Conversation session store (Phase 3).
+ * In-memory Live Conversation session store (Phase 3 + Phase 6 AI integration).
  * No MongoDB persistence — future phases will use MongoDB Atlas.
  */
+
+import { analyzeLiveMirror } from '../ai/index.js';
+import { isGeminiAvailable } from '../ai/geminiProvider.js';
 
 const sessions = new Map();
 
@@ -14,6 +17,52 @@ function generateCode() {
     code = `EM-${digits}`;
   } while (sessions.has(code));
   return code;
+}
+
+/** Demo live mirror (fallback) */
+function getDemoLiveMirrorFallback() {
+  return {
+    demo: true,
+    signals: [
+      { emoji: '😔', label: 'Hurt', confidence: 76 },
+      { emoji: '🛡', label: 'Defensive', confidence: 51 },
+    ],
+    interpretation: 'They may feel unheard.',
+    temperature: {
+      current: 65,
+      label: 'Warm',
+      trend: 'stable',
+    },
+  };
+}
+
+/** Generate live mirror using AI or demo fallback */
+export async function getLiveMirror(session, participantId) {
+  const participant = session.participants.find((p) => p.id === participantId);
+  if (!participant) return null;
+
+  // If no messages yet, return demo
+  if (!session.messages || session.messages.length === 0) {
+    return getDemoLiveMirrorFallback();
+  }
+
+  // Try AI analysis first
+  if (isGeminiAvailable()) {
+    try {
+      const aiMirror = await analyzeLiveMirror({
+        messages: session.messages,
+        currentParticipantName: participant.name,
+      });
+      return aiMirror;
+    } catch (error) {
+      console.error('Live mirror AI analysis failed:', error.message);
+      console.log('→ Falling back to demo data');
+      return getDemoLiveMirrorFallback();
+    }
+  }
+
+  // Fallback to demo
+  return getDemoLiveMirrorFallback();
 }
 
 export function createLiveSession({ hostName, conversationType }) {

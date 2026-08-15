@@ -12,4 +12,5 @@ export const LIVE_EVENTS = {
   END: 'live:end',
   ENDED: 'live:ended',
   ERROR: 'live:error',
+  LIVE_MIRROR: 'live:mirror', // Phase 6 AI mirror update
 };

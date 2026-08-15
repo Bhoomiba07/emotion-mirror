@@ -5,15 +5,15 @@ export const soloController = {
     res.json({
       mode: 'solo',
       ready: true,
-      phase: 5,
-      message: 'Solo Reflection mode is available.',
+      phase: 6,
+      message: 'Solo Reflection mode is available with AI analysis.',
     });
   },
 
-  analyzePaste(req, res, next) {
+  async analyzePaste(req, res, next) {
     try {
       const { text } = req.body;
-      const session = createSoloSession({
+      const session = await createSoloSession({
         inputMethod: 'paste',
         inputText: text,
       });
@@ -27,10 +27,10 @@ export const soloController = {
     }
   },
 
-  analyzeDescribe(req, res, next) {
+  async analyzeDescribe(req, res, next) {
     try {
       const { description } = req.body;
-      const session = createSoloSession({
+      const session = await createSoloSession({
         inputMethod: 'describe',
         inputText: description,
       });

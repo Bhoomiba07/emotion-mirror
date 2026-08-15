@@ -3,8 +3,8 @@ import { io } from 'socket.io-client';
 const SOCKET_URL = import.meta.env.VITE_SOCKET_URL || '';
 
 /**
- * Socket.IO client for Live Conversation mode.
- * Used only for room join, presence, and messaging — not AI analysis.
+ * Socket.IO client for Live Conversation mode (Phase 6 AI-enabled).
+ * Used for room join, presence, messaging, and AI analysis.
  */
 export function createLiveSocket() {
   return io(SOCKET_URL, {
@@ -25,6 +25,7 @@ export const LIVE_EVENTS = {
   END: 'live:end',
   ENDED: 'live:ended',
   ERROR: 'live:error',
+  LIVE_MIRROR: 'live:mirror', // Phase 6 AI mirror update
 };
 
 export function getOrCreateParticipantId(code) {

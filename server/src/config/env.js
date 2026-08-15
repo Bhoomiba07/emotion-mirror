@@ -3,4 +3,5 @@ export const env = {
   clientOrigin: process.env.CLIENT_ORIGIN || 'http://localhost:5173',
   mongodbUri: process.env.MONGODB_URI || '',
   nodeEnv: process.env.NODE_ENV || 'development',
+  geminiApiKey: process.env.GEMINI_API_KEY || '',
 };

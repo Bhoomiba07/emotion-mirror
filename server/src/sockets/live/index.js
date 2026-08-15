@@ -5,20 +5,28 @@ import {
   addParticipant,
   endLiveSession,
   getLiveSession,
+  getLiveMirror,
   getRoomState,
   removeParticipant,
 } from '../../services/liveSessionService.js';
 import { LIVE_EVENTS } from './events.js';
 
+async function emitLiveMirrorToSocket(socket, session, participantId) {
+  const mirror = await getLiveMirror(session, participantId);
+  if (mirror) {
+    socket.emit(LIVE_EVENTS.LIVE_MIRROR, mirror);
+  }
+}
+
 /**
- * Register Live Conversation Socket.IO handlers on a shared io instance.
+ * Register Live Conversation Socket.IO handlers on a shared io instance (Phase 6 AI-enabled).
  */
 export function registerLiveHandlers(io) {
   io.on('connection', (socket) => {
     let currentCode = null;
     let currentParticipantId = null;
 
-    socket.on(LIVE_EVENTS.JOIN, (payload, callback) => {
+    socket.on(LIVE_EVENTS.JOIN, async (payload, callback) => {
       try {
         const { code, participantId, name, role } = payload ?? {};
         const session = getLiveSession(code);
@@ -56,7 +64,12 @@ export function registerLiveHandlers(io) {
         currentParticipantId = participantId;
         socket.join(currentCode);
 
+        const updatedSession = getLiveSession(currentCode);
         const roomState = getRoomState(currentCode);
+
+        // Send initial AI mirror
+        await emitLiveMirrorToSocket(socket, updatedSession, currentParticipantId);
+
         socket.emit(LIVE_EVENTS.JOINED, roomState);
         socket.to(currentCode).emit(LIVE_EVENTS.PARTICIPANT_JOINED, roomState);
         io.to(currentCode).emit(LIVE_EVENTS.ROOM_STATE, roomState);
@@ -69,7 +82,7 @@ export function registerLiveHandlers(io) {
       }
     });
 
-    socket.on(LIVE_EVENTS.MESSAGE_SEND, (payload, callback) => {
+    socket.on(LIVE_EVENTS.MESSAGE_SEND, async (payload, callback) => {
       if (!currentCode || !currentParticipantId) {
         callback?.({ ok: false, message: 'Not connected to a room.' });
         return;
@@ -100,6 +113,18 @@ export function registerLiveHandlers(io) {
       });
 
       io.to(currentCode).emit(LIVE_EVENTS.MESSAGE_RECEIVED, message);
+
+      // Update AI mirrors after new message (controlled - only when message is sent)
+      const updatedSession = getLiveSession(currentCode);
+      for (const p of updatedSession.participants) {
+        if (p.connected && p.socketId) {
+          const participantSocket = io.sockets.sockets.get(p.socketId);
+          if (participantSocket) {
+            await emitLiveMirrorToSocket(participantSocket, updatedSession, p.id);
+          }
+        }
+      }
+
       callback?.({ ok: true, message });
     });
 

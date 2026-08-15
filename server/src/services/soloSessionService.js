@@ -1,8 +1,11 @@
 /**
- * Solo Reflection session service (Phase 5).
+ * Solo Reflection session service (Phase 5 + Phase 6 AI integration).
  * In-memory storage — no database.
- * Demo analysis data only — no real AI.
+ * Now uses real Gemini AI with demo fallback.
  */
+
+import { analyzeSoloConversation } from '../ai/index.js';
+import { isGeminiAvailable } from '../ai/geminiProvider.js';
 
 const sessions = new Map();
 
@@ -85,10 +88,23 @@ function getDemoReflection() {
   ];
 }
 
+/** Generate demo analysis (fallback) */
+function generateDemoAnalysis(inputMethod) {
+  return {
+    demo: true,
+    emotionalSignals: getDemoEmotionalSignals(inputMethod),
+    interpretation: getDemoInterpretation(inputMethod),
+    userSignals: getDemoUserSignals(inputMethod),
+    temperature: getDemoTemperature(),
+    turningPoints: getDemoTurningPoints(),
+    reflection: getDemoReflection(),
+  };
+}
+
 /**
  * Create a Solo analysis session.
  */
-export function createSoloSession({ inputMethod, inputText }) {
+export async function createSoloSession({ inputMethod, inputText }) {
   if (!inputMethod || !['paste', 'describe', 'upload'].includes(inputMethod)) {
     throw Object.assign(new Error('Invalid input method.'), { status: 400 });
   }
@@ -99,20 +115,33 @@ export function createSoloSession({ inputMethod, inputText }) {
   }
 
   const sessionId = crypto.randomUUID();
+  let analysisResults;
+
+  // Try AI analysis first, fallback to demo
+  if (isGeminiAvailable()) {
+    try {
+      console.log(`Analyzing Solo session with Gemini AI (method: ${inputMethod})...`);
+      analysisResults = await analyzeSoloConversation({
+        inputText: trimmedText,
+        inputMethod,
+      });
+      console.log('✓ Gemini AI analysis successful');
+    } catch (error) {
+      console.error('✗ Gemini AI analysis failed:', error.message);
+      console.log('→ Falling back to demo data');
+      analysisResults = generateDemoAnalysis(inputMethod);
+    }
+  } else {
+    console.log('Gemini not configured - using demo data');
+    analysisResults = generateDemoAnalysis(inputMethod);
+  }
+
   const session = {
     sessionId,
     inputMethod,
     inputText: trimmedText,
     createdAt: new Date().toISOString(),
-    analysisResults: {
-      demo: true,
-      emotionalSignals: getDemoEmotionalSignals(inputMethod),
-      interpretation: getDemoInterpretation(inputMethod),
-      userSignals: getDemoUserSignals(inputMethod),
-      temperature: getDemoTemperature(),
-      turningPoints: getDemoTurningPoints(),
-      reflection: getDemoReflection(),
-    },
+    analysisResults,
   };
 
   sessions.set(sessionId, session);

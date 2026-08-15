@@ -5,8 +5,8 @@ import {
 } from '../../../services/liveSocket.js';
 
 /**
- * Hook for Live Conversation Socket.IO connection.
- * Handles join, messages, room state, and end — no AI events.
+ * Hook for Live Conversation Socket.IO connection (Phase 6 AI-enabled).
+ * Handles join, messages, room state, end, and AI mirror updates.
  */
 export function useLiveSocket({ code, participantId, name, role, enabled }) {
   const socketRef = useRef(null);
@@ -15,6 +15,7 @@ export function useLiveSocket({ code, participantId, name, role, enabled }) {
   const [messages, setMessages] = useState([]);
   const [error, setError] = useState(null);
   const [ended, setEnded] = useState(false);
+  const [liveMirror, setLiveMirror] = useState(null); // Phase 6: AI mirror data
 
   useEffect(() => {
     if (!enabled || !code || !participantId || !name || !role) return undefined;
@@ -81,6 +82,11 @@ export function useLiveSocket({ code, participantId, name, role, enabled }) {
       setError(payload?.message || 'A connection error occurred.');
     });
 
+    // Phase 6: Listen for AI mirror updates
+    socket.on(LIVE_EVENTS.LIVE_MIRROR, (mirror) => {
+      setLiveMirror(mirror);
+    });
+
     socket.connect();
 
     return () => {
@@ -129,6 +135,7 @@ export function useLiveSocket({ code, participantId, name, role, enabled }) {
     messages,
     error,
     ended,
+    liveMirror, // Phase 6: Expose AI mirror data
     sendMessage,
     endConversation,
   };

@@ -1,8 +1,12 @@
 /**
- * In-memory Private Mirror session store (Phase 4).
+ * In-memory Private Mirror session store (Phase 4 + Phase 6 AI integration).
  * Shared state and private mirror data are kept separate.
+ * Now uses real Gemini AI with demo fallback.
  * No MongoDB — future phases will use MongoDB Atlas.
  */
+
+import { analyzePrivateMirror } from '../ai/index.js';
+import { isGeminiAvailable } from '../ai/geminiProvider.js';
 
 const sessions = new Map();
 
@@ -26,8 +30,8 @@ function generateCode() {
   return code;
 }
 
-/** Demo mirror of the OTHER participant — never broadcast in room state. */
-export function getDemoPrivateMirror(session, participantId) {
+/** Demo mirror of the OTHER participant (fallback) */
+function getDemoPrivateMirrorFallback(session, participantId) {
   const participant = session.participants.find((p) => p.id === participantId);
   if (!participant) return null;
 
@@ -52,6 +56,35 @@ export function getDemoPrivateMirror(session, participantId) {
     ],
     interpretation: 'They may feel pressured by the conversation.',
   };
+}
+
+/** Generate private mirror using AI or demo fallback */
+export async function getDemoPrivateMirror(session, participantId) {
+  const participant = session.participants.find((p) => p.id === participantId);
+  if (!participant) return null;
+
+  // If no messages yet, return demo
+  if (!session.messages || session.messages.length === 0) {
+    return getDemoPrivateMirrorFallback(session, participantId);
+  }
+
+  // Try AI analysis first
+  if (isGeminiAvailable()) {
+    try {
+      const aiMirror = await analyzePrivateMirror({
+        messages: session.messages,
+        targetParticipantRole: participant.role,
+      });
+      return aiMirror;
+    } catch (error) {
+      console.error('Private mirror AI analysis failed:', error.message);
+      console.log('→ Falling back to demo data');
+      return getDemoPrivateMirrorFallback(session, participantId);
+    }
+  }
+
+  // Fallback to demo
+  return getDemoPrivateMirrorFallback(session, participantId);
 }
 
 export function createPrivateSession({ hostName, conversationType }) {
@@ -207,7 +240,7 @@ export function getSharedRoomState(code) {
   };
 }
 
-export function setShareReflection(code, participantId, selection) {
+export async function setShareReflection(code, participantId, selection) {
   const session = getPrivateSession(code);
   if (!session) return null;
 
@@ -222,11 +255,11 @@ export function setShareReflection(code, participantId, selection) {
 
   participant.shareSelection = normalized;
 
-  const mirror = getDemoPrivateMirror(session, participantId);
+  const mirror = await getDemoPrivateMirror(session, participantId);
   const publicShare = {
     participantId: participant.id,
     participantName: participant.name,
-    demo: true,
+    demo: mirror?.demo || false,
     shared: {},
   };
 
@@ -237,7 +270,7 @@ export function setShareReflection(code, participantId, selection) {
     publicShare.shared.privateInterpretation = mirror.interpretation;
   }
   if (normalized.conversationSummary) {
-    publicShare.shared.conversationSummary = DEMO_CONVERSATION_SUMMARY;
+    publicShare.shared.conversationSummary = mirror?.conversationSummary || DEMO_CONVERSATION_SUMMARY;
   }
 
   const existingIndex = session.sharedReflections.findIndex(
