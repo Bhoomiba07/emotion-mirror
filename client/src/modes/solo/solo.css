@@ -1,0 +1,198 @@
+/* Solo Reflection — general UI (non-neon areas) */
+
+.solo-page {
+  display: grid;
+  gap: 1.5rem;
+  width: min(720px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2.4rem 0 4.5rem;
+}
+
+.solo-page__intro {
+  display: grid;
+  gap: 0.75rem;
+  text-align: center;
+  justify-items: center;
+}
+
+.solo-methods {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+.solo-method-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.solo-method-card:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lift);
+}
+
+.solo-method-card h2 {
+  font-size: 1.3rem;
+}
+
+.solo-method-card p {
+  color: var(--color-muted);
+  flex: 1;
+}
+
+.solo-method-card .btn {
+  align-self: flex-start;
+  width: 100%;
+}
+
+.solo-form {
+  padding: 1.5rem;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  display: grid;
+  gap: 1.25rem;
+}
+
+.solo-form textarea {
+  width: 100%;
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  border: 1px solid var(--color-border-strong);
+  background: rgba(255, 255, 255, 0.7);
+  font-family: inherit;
+  font-size: 1rem;
+  resize: vertical;
+}
+
+.solo-form textarea:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
+.form-hint {
+  font-size: 0.88rem;
+  color: var(--color-muted);
+}
+
+.solo-note {
+  padding: 0.85rem 1rem;
+  border-radius: 12px;
+  background: rgba(107, 90, 62, 0.08);
+  border: 1px solid var(--color-border);
+  font-size: 0.95rem;
+  color: var(--color-muted);
+}
+
+.solo-form-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.solo-form-actions .btn {
+  flex: 1;
+  min-width: 140px;
+}
+
+.solo-placeholder-box {
+  padding: 2.5rem 1.5rem;
+  border-radius: var(--radius);
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  text-align: center;
+  display: grid;
+  gap: 1rem;
+  justify-items: center;
+}
+
+.solo-placeholder-icon {
+  font-size: 3.5rem;
+  opacity: 0.6;
+}
+
+.solo-placeholder-box h2 {
+  font-size: 1.5rem;
+}
+
+.solo-placeholder-box p {
+  color: var(--color-muted);
+  max-width: 32rem;
+}
+
+.solo-placeholder-actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+.solo-results-page {
+  width: min(920px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2.4rem 0 4.5rem;
+  display: grid;
+  gap: 1.5rem;
+}
+
+.solo-results__intro {
+  display: grid;
+  gap: 0.75rem;
+  text-align: center;
+  justify-items: center;
+}
+
+.solo-results__panels {
+  display: grid;
+  gap: 1.25rem;
+}
+
+.solo-results__actions {
+  display: flex;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+  justify-content: center;
+  margin-top: 1rem;
+}
+
+@media (max-width: 720px) {
+  .solo-methods {
+    grid-template-columns: 1fr;
+  }
+
+  .solo-form-actions {
+    flex-direction: column;
+  }
+
+  .solo-form-actions .btn {
+    width: 100%;
+  }
+
+  .solo-placeholder-actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .solo-placeholder-actions .btn {
+    width: 100%;
+  }
+
+  .solo-results__actions {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .solo-results__actions .btn {
+    width: 100%;
+  }
+}

@@ -1,11 +1,10 @@
 import { Router } from 'express';
+import { soloController } from '../controllers/soloController.js';
 
 export const soloRouter = Router();
 
-soloRouter.get('/status', (_req, res) => {
-  res.json({
-    mode: 'solo',
-    ready: false,
-    message: 'Solo Reflection REST endpoints will be implemented in a later phase.',
-  });
-});
+soloRouter.get('/status', soloController.getStatus);
+soloRouter.post('/analyze-paste', soloController.analyzePaste);
+soloRouter.post('/analyze-describe', soloController.analyzeDescribe);
+soloRouter.post('/analyze-upload', soloController.analyzeUpload);
+soloRouter.get('/results/:sessionId', soloController.getResults);

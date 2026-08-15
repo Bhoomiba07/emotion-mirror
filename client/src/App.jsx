@@ -16,7 +16,11 @@ import PrivateWaitingPage from './modes/private/PrivateWaitingPage.jsx';
 import PrivateJoinPage from './modes/private/PrivateJoinPage.jsx';
 import PrivateRoomPage from './modes/private/PrivateRoomPage.jsx';
 import PrivateCompletePage from './modes/private/PrivateCompletePage.jsx';
-import SoloModePlaceholder from './modes/solo/SoloModePlaceholder.jsx';
+import SoloChooseMethodPage from './modes/solo/SoloChooseMethodPage.jsx';
+import SoloPastePage from './modes/solo/SoloPastePage.jsx';
+import SoloUploadPage from './modes/solo/SoloUploadPage.jsx';
+import SoloDescribePage from './modes/solo/SoloDescribePage.jsx';
+import SoloResultsPage from './modes/solo/SoloResultsPage.jsx';
 
 function App() {
   return (
@@ -34,7 +38,11 @@ function App() {
         <Route path="/private/waiting/:code" element={<PrivateWaitingPage />} />
         <Route path="/private/join/:code" element={<PrivateJoinPage />} />
         <Route path="/private/complete/:code" element={<PrivateCompletePage />} />
-        <Route path="/solo" element={<SoloModePlaceholder />} />
+        <Route path="/solo" element={<SoloChooseMethodPage />} />
+        <Route path="/solo/paste" element={<SoloPastePage />} />
+        <Route path="/solo/upload" element={<SoloUploadPage />} />
+        <Route path="/solo/describe" element={<SoloDescribePage />} />
+        <Route path="/solo/results/:sessionId" element={<SoloResultsPage />} />
       </Route>
 
       <Route element={<LiveRoomLayout />}>
